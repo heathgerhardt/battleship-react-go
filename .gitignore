@@ -1,0 +1,13 @@
+
+react/node_modules
+react/.pnp
+react/.pnp.js
+
+react/coverage
+react/build
+
+react/npm-debug.log*
+react/yarn-debug.log*
+react/yarn-error.log*
+
+/.idea
