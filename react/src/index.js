@@ -47,8 +47,6 @@ class Game extends React.Component {
         board: this.generateBoard(),
         name: "Player 2"
       },
-      board: [],
-      name: '',
       firstPlayer: true
     }
   }
@@ -65,15 +63,18 @@ class Game extends React.Component {
     });
   }
 
+  currentBoard() {
+    return this.state.firstPlayer 
+      ? this.state.player1.board : this.state.player2.board;
+  }
+
   handleClick(row, column) {
-    this.state.board = this.state.firstPlayer ? this.state.player1.board 
-                                              : this.state.player2.board;
-    const board = this.state.board.slice();
     this.shoot(row, column)
       .then(response => response.json())
       .then((data) => {
+        let board = this.currentBoard();
         board[row][column] = data.Hit ? '*' : 'o';
-        this.setState({board: board});
+        this.setState({firstPlayer: !this.state.firstPlayer});
       },
       (error) => {console.log(error)});
   }
@@ -85,8 +86,7 @@ class Game extends React.Component {
       <div className="game">
         <div className="player-name">{player.name}</div>
         <div className="message">{message}</div>
-        <GameBoard board={player.board}
-            onClick={(i, j) => this.handleClick(i, j)}/>
+        <GameBoard board={player.board} onClick={(i, j) => this.handleClick(i, j)}/>
       </div>
     );
   }
