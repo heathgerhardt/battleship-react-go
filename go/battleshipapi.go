@@ -5,7 +5,26 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+
+	"github.com/graphql-go/graphql"
+	"github.com/graphql-go/handler"
 )
+
+var descriptionType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "Description",
+	Fields: graphql.Fields{
+		"description": &graphql.Field{
+			Type: graphql.String,
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				return "Battleship game Go API", nil
+			},
+		},
+	},
+})
+
+var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
+	Query: descriptionType,
+})
 
 type ShotResult struct {
 	Hit bool
@@ -16,7 +35,12 @@ type Shot struct {
 }
 
 func main() {
-	http.HandleFunc("/battleship", DescriptionServer)
+	handl := handler.New(&handler.Config{
+		Schema: &schema,
+		Pretty: true,
+	})
+	http.Handle("/battleship", handl)
+
 	http.HandleFunc("/battleship/shot", ShotServer)
 	http.ListenAndServe(":8080", nil)
 }
@@ -34,11 +58,6 @@ func ShotServer(writer http.ResponseWriter, request *http.Request) {
 	OkJsonHeaders(writer)
 	hit := ShotResult{Hit: rand.Intn(2) == 0}
 	json.NewEncoder(writer).Encode(hit)
-}
-
-func DescriptionServer(writer http.ResponseWriter, request *http.Request) {
-	OkJsonHeaders(writer)
-	fmt.Fprintf(writer, "{\"description\": \"Battleship game Go API\"}")
 }
 
 func OkJsonHeaders(writer http.ResponseWriter) {
