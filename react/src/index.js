@@ -73,20 +73,20 @@ class Game extends React.Component {
     this.shoot(row, column)
       .then(response => response.json())
       .then((data) => {
-        let board = this.currentPlayer().board;
-        board[row][column] = data.Hit ? '*' : 'o';
+        let player = this.currentPlayer();
+        player.board[row][column] = data.Hit ? '*' : 'o';
+        if (data.Hit) player.hits++;
         this.setState({firstPlayer: !this.state.firstPlayer});
       },
       (error) => {console.log(error)});
   }
 
   render() {
-    let message = 'Hits on your ship: 0';
     let player = this.currentPlayer();
     return (
       <div className="game">
         <div className="player-name">{player.name}</div>
-        <div className="message">{message}</div>
+        <div className="message">{'Hits on your ship: ' + player.hits}</div>
         <GameBoard board={player.board} onClick={(i, j) => this.handleClick(i, j)}/>
       </div>
     );
