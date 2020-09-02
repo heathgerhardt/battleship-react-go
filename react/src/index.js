@@ -31,7 +31,7 @@ class GameBoard extends React.Component {
   }
 }
 
-const ApiUrl = 'http://localhost:8080/battleship/'
+const ApiUrl = 'http://localhost:8080/battleship'
 
 class Game extends React.Component {
   BoardDimension = 8;
@@ -59,9 +59,10 @@ class Game extends React.Component {
   }
 
   shoot(row, column) {
-    return fetch(ApiUrl + 'shot', {
+    return fetch(ApiUrl, {
       method: 'post',
-      body: JSON.stringify({row: row, column: column})
+      headers: {'Content-Type': 'application/graphql'},
+      body: `{shot(row:${row}, column:${column})}`
     });
   }
 
@@ -72,7 +73,7 @@ class Game extends React.Component {
   winner() {
     // todo api call for this
     let otherPlayer = this.state.firstPlayer ? this.state.player2 : this.state.player1;
-    if (otherPlayer.hits == 3) return otherPlayer;
+    if (otherPlayer.hits === 3) return otherPlayer;
     return null;
   }
 
@@ -82,8 +83,9 @@ class Game extends React.Component {
       .then(response => response.json())
       .then((data) => {
         let player = this.currentPlayer();
-        player.board[row][column] = data.Hit ? '*' : 'o';
-        if (data.Hit) player.hits++;
+        let hit = data.data.shot;
+        player.board[row][column] = hit ? '*' : 'o';
+        if (hit) player.hits++;
         this.setState({firstPlayer: !this.state.firstPlayer});
       },
       (error) => {console.log(error)});
