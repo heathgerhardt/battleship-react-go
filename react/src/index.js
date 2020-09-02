@@ -69,7 +69,15 @@ class Game extends React.Component {
     return this.state.firstPlayer ? this.state.player1 : this.state.player2;
   }
 
+  winner() {
+    // todo api call for this
+    let otherPlayer = this.state.firstPlayer ? this.state.player2 : this.state.player1;
+    if (otherPlayer.hits == 3) return otherPlayer;
+    return null;
+  }
+
   handleClick(row, column) {
+    if (this.winner()) return;
     this.shoot(row, column)
       .then(response => response.json())
       .then((data) => {
@@ -83,10 +91,14 @@ class Game extends React.Component {
 
   render() {
     let player = this.currentPlayer();
+    let message;
+    let winner = this.winner()
+    if (winner) message = winner.name + ' wins';
+    else message = 'Hits on enemy ship: ' + player.hits;
     return (
       <div className="game">
         <div className="player-name">{player.name}</div>
-        <div className="message">{'Hits on enemy ship: ' + player.hits}</div>
+        <div className="message">{message}</div>
         <GameBoard board={player.board} onClick={(i, j) => this.handleClick(i, j)}/>
       </div>
     );
