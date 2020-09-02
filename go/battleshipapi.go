@@ -10,7 +10,7 @@ import (
 	"github.com/graphql-go/handler"
 )
 
-var descriptionType = graphql.NewObject(graphql.ObjectConfig{
+var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Description",
 	Fields: graphql.Fields{
 		"description": &graphql.Field{
@@ -19,11 +19,28 @@ var descriptionType = graphql.NewObject(graphql.ObjectConfig{
 				return "Battleship game Go API", nil
 			},
 		},
+		"shot": &graphql.Field{
+			Type: graphql.Boolean,
+			Args: graphql.FieldConfigArgument{
+				"row": &graphql.ArgumentConfig{
+					Type: graphql.Int,
+				},
+				"column": &graphql.ArgumentConfig{
+					Type: graphql.Int,
+				},
+			},
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				row, _ := p.Args["row"]
+				column, _ := p.Args["column"]
+				fmt.Printf("row: %d, column: %d\n", row, column)
+				return rand.Intn(2) == 0, nil
+			},
+		},
 	},
 })
 
 var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
-	Query: descriptionType,
+	Query: rootQuery,
 })
 
 type ShotResult struct {
