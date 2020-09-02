@@ -39,15 +39,17 @@ class Game extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      player1: {
-        board: this.generateBoard(),
-        name: "Player 1"
-      },
-      player2: {
-        board: this.generateBoard(),
-        name: "Player 2"
-      },
+      player1: this.generatePlayer(1),
+      player2: this.generatePlayer(2),
       firstPlayer: true
+    }
+  }
+
+  generatePlayer(num) {
+    return {
+      board: this.generateBoard(),
+      name: "Player " + num,
+      hits: 0
     }
   }
 
@@ -63,16 +65,15 @@ class Game extends React.Component {
     });
   }
 
-  currentBoard() {
-    return this.state.firstPlayer 
-      ? this.state.player1.board : this.state.player2.board;
+  currentPlayer() {
+    return this.state.firstPlayer ? this.state.player1 : this.state.player2;
   }
 
   handleClick(row, column) {
     this.shoot(row, column)
       .then(response => response.json())
       .then((data) => {
-        let board = this.currentBoard();
+        let board = this.currentPlayer().board;
         board[row][column] = data.Hit ? '*' : 'o';
         this.setState({firstPlayer: !this.state.firstPlayer});
       },
@@ -81,7 +82,7 @@ class Game extends React.Component {
 
   render() {
     let message = 'Hits on your ship: 0';
-    let player = this.state.firstPlayer ? this.state.player1 : this.state.player2;
+    let player = this.currentPlayer();
     return (
       <div className="game">
         <div className="player-name">{player.name}</div>
