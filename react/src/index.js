@@ -86,7 +86,7 @@ class Game extends React.Component {
     return (
       <div className="game">
         <div className="player-name">{player.name}</div>
-        <div className="message">{'Hits on your ship: ' + player.hits}</div>
+        <div className="message">{'Hits on enemy ship: ' + player.hits}</div>
         <GameBoard board={player.board} onClick={(i, j) => this.handleClick(i, j)}/>
       </div>
     );
