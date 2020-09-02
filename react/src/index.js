@@ -10,16 +10,52 @@ function Square(props) {
   );
 }
 
+class GameBoard extends React.Component {
+  renderSquare(row, column) {
+    return (<Square value={this.props.board[row][column]}
+            onClick={() => this.props.onClick(row, column)} 
+            key={row+','+column}/>);
+  }
+
+  render() {
+    return (
+      <div className="game-board">
+        {this.props.board.map((row, i) => {
+          return (
+            <div className="board-row" key={i}>
+              {row.map((item, j) => this.renderSquare(i, j))}
+            </div>)
+        })}
+      </div>
+    );
+  }
+}
+
 const ApiUrl = 'http://localhost:8080/battleship/'
 
-class GameBoard extends React.Component {
+class Game extends React.Component {
   BoardDimension = 8;
 
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
-      squares: [...Array(this.BoardDimension)].map(() => Array(this.BoardDimension).fill(null))
-    };
+      player1: {
+        board: this.generateBoard(),
+        name: "Player 1"
+      },
+      player2: {
+        board: this.generateBoard(),
+        name: "Player 2"
+      },
+      board: [],
+      name: '',
+      firstPlayer: true
+    }
+  }
+
+  generateBoard() {
+    return [...Array(this.BoardDimension)]
+            .map(() => Array(this.BoardDimension).fill(null));
   }
 
   shoot(row, column) {
@@ -30,78 +66,27 @@ class GameBoard extends React.Component {
   }
 
   handleClick(row, column) {
-    const squares = this.state.squares.slice();
+    this.state.board = this.state.firstPlayer ? this.state.player1.board 
+                                              : this.state.player2.board;
+    const board = this.state.board.slice();
     this.shoot(row, column)
       .then(response => response.json())
       .then((data) => {
-        squares[row][column] = data.Hit ? '*' : 'o';
-        this.setState({squares: squares});
+        board[row][column] = data.Hit ? '*' : 'o';
+        this.setState({board: board});
       },
       (error) => {console.log(error)});
   }
 
-  renderSquare(row, column) {
-    return (<Square value={this.state.squares[row][column]}
-            onClick={() => this.handleClick(row, column)} 
-            key={row+','+column}/>);
-  }
-
   render() {
-    const winner = calculateWinner(this.state.squares);
-    let message;
-    if (winner) {
-      message = 'Winner: ' + winner;
-    } else {
-      message = 'Hits on your ship: 0';
-    }
- 
-    return (
-      <div>
-        <div className="message">{message}</div>
-        {this.state.squares.map((row, i) => {
-          return (
-            <div className="board-row" key={i}>
-              {row.map((item, j) => this.renderSquare(i, j) )}
-            </div>)
-        })}
-      </div>
-    );
-  }
-}
-
-function calculateWinner(squares) {
-  return null;
-}
-
-class Player extends React.Component {
-  constructor(props) {
-    super(props)
-    this.name = props.name;
-  }
-
-  handleClick() {
-
-  }
-  
-  render() {
-    return (
-      <div className="player">
-        <div className="player-name">{this.name}</div>
-        <div className="game-board">
-          <GameBoard onClick={() => this.handleClick()}/>
-        </div>
-      </div>
-    );
-  }
-}
-
-class Game extends React.Component {
-  render() {
+    let message = 'Hits on your ship: 0';
+    let player = this.state.firstPlayer ? this.state.player1 : this.state.player2;
     return (
       <div className="game">
-        <div className="player">
-          <Player name="Player 1"/>
-        </div>
+        <div className="player-name">{player.name}</div>
+        <div className="message">{message}</div>
+        <GameBoard board={player.board}
+            onClick={(i, j) => this.handleClick(i, j)}/>
       </div>
     );
   }

@@ -5,9 +5,9 @@ features:
 * disallow hitting same square?
 * win condition 
 * database for game state
+* end turn button with shot changable before?
 
 todo:
 * react tests
 * go tests
 * change styling
-* better code organization
