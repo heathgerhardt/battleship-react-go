@@ -1,6 +1,5 @@
 create table shots (
-	id integer primary key not null,
-	player text not null,
+	id serial primary key,
 	board_row integer not null,
 	board_column integer not null
 );

@@ -8,6 +8,4 @@ TODO:
 * place ships in React
 * endpoint for ship placement
 * implement shot logic on server
-* game win logic
-* GraphQL for api
-* Postgres for state
+* game win logic on server
