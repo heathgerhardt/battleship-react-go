@@ -32,10 +32,9 @@ class GameBoard extends React.Component {
 }
 
 const ApiUrl = 'http://localhost:8080/battleship'
+const BoardDimension = 8;
 
 class Game extends React.Component {
-  BoardDimension = 8;
-
   constructor(props) {
     super(props)
     this.state = {
@@ -54,8 +53,8 @@ class Game extends React.Component {
   }
 
   generateBoard() {
-    return [...Array(this.BoardDimension)]
-            .map(() => Array(this.BoardDimension).fill(null));
+    return [...Array(BoardDimension)]
+            .map(() => Array(BoardDimension).fill(null));
   }
 
   shoot(row, column) {
@@ -72,7 +71,7 @@ class Game extends React.Component {
 
   winner() {
     // todo api call for this
-    let otherPlayer = this.state.firstPlayer ? this.state.player2 : this.state.player1;
+    const otherPlayer = this.state.firstPlayer ? this.state.player2 : this.state.player1;
     if (otherPlayer.hits === 3) return otherPlayer;
     return null;
   }
@@ -82,8 +81,8 @@ class Game extends React.Component {
     this.shoot(row, column)
       .then(response => response.json())
       .then((data) => {
-        let player = this.currentPlayer();
-        let hit = data.data.shot;
+        const player = this.currentPlayer();
+        const hit = data.data.shot;
         player.board[row][column] = hit ? '*' : 'o';
         if (hit) player.hits++;
         this.setState({firstPlayer: !this.state.firstPlayer});
@@ -92,9 +91,9 @@ class Game extends React.Component {
   }
 
   render() {
-    let player = this.currentPlayer();
+    const player = this.currentPlayer();
     let message;
-    let winner = this.winner()
+    const winner = this.winner()
     if (winner) message = winner.name + ' wins';
     else message = 'Hits on enemy ship: ' + player.hits;
     return (
