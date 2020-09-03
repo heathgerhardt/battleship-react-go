@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"net/http"
+	"os"
 
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
+	"github.com/jackc/pgx/v4"
 )
 
 var rootQuery = graphql.NewObject(graphql.ObjectConfig{
@@ -43,12 +46,23 @@ var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
 })
 
 func main() {
+	pgConnection := pgConnect()
 	server := handler.New(&handler.Config{
 		Schema: &schema,
 		Pretty: true,
 	})
 	http.Handle("/battleship", disableCors(server))
 	http.ListenAndServe(":8080", nil)
+}
+
+func pgConnect() Conn {
+	conn, err := pgx.Connect(context.Background(), "postgresql://localhost/mydb?user=other&password=secret")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
+	defer conn.Close(context.Background())
+	return conn
 }
 
 func disableCors(server http.Handler) http.Handler {
