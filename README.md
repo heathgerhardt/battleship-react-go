@@ -9,3 +9,6 @@ TODO:
 * endpoint for ship placement
 * implement shot logic on server
 * game win logic on server
+* create game session
+* react tests
+* go tests
