@@ -47,6 +47,7 @@ var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
 })
 
 func storeShot(row int, column int) {
+	// using transaction for demonstraction purposes
 	tx, err := pgConnection.Begin(context.Background())
 	if err != nil {
 		fmt.Printf("Could not create transaction: %v\n", err)
@@ -78,6 +79,8 @@ func main() {
 
 func pgConnect() *pgx.Conn {
 	fmt.Printf("Connecting to Postgres\n")
+	// password would normally be set during build or access granted through
+	// some kind of access management system
 	conn, err := pgx.Connect(context.Background(),
 		"postgresql://localhost/battleship?user=battleship&password=bBDQX12NamCni5")
 	if err != nil {
