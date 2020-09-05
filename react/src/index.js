@@ -20,10 +20,11 @@ class GameBoard extends React.Component {
   render() {
     return (
       <div className="game-board">
-        {this.props.board.map((row, i) => {
+        {this.props.board.map((row, rowIndex) => {
           return (
-            <div className="board-row" key={i}>
-              {row.map((item, j) => this.renderSquare(i, j))}
+            <div className="board-row" key={rowIndex}>
+              {row.map((square, columnIndex)
+                => this.renderSquare(rowIndex, columnIndex))}
             </div>)
         })}
       </div>
@@ -90,6 +91,10 @@ class Game extends React.Component {
       (error) => {console.log(error)});
   }
 
+  componentDidMount() {
+    console.log("game load");
+  }
+
   render() {
     const player = this.currentPlayer();
     let message;
@@ -100,7 +105,8 @@ class Game extends React.Component {
       <div className="game">
         <div className="player-name">{player.name}</div>
         <div className="message">{message}</div>
-        <GameBoard board={player.board} onClick={(i, j) => this.handleClick(i, j)}/>
+        <GameBoard board={player.board} 
+          onClick={(row, column) => this.handleClick(row, column)}/>
       </div>
     );
   }

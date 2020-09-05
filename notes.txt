@@ -11,3 +11,4 @@ todo:
 * react tests
 * go tests
 * change styling
+* react service class for api calls
