@@ -23,8 +23,8 @@ class GameBoard extends React.Component {
         {this.props.board.map((row, rowIndex) => {
           return (
             <div className="board-row" key={rowIndex}>
-              {row.map((square, columnIndex)
-                => this.renderSquare(rowIndex, columnIndex))}
+              {row.map((square, columnIndex) => 
+                this.renderSquare(rowIndex, columnIndex))}
             </div>)
         })}
       </div>
