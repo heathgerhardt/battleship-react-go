@@ -16,4 +16,3 @@ grant usage on schema public to battleship;
 grant select, insert, update, delete on all tables in schema public to battleship;
 grant all privileges on all tables in schema public to battleship;
 grant all privileges on all sequences in schema public to battleship;
-grant all privileges on database battleship to battleship;

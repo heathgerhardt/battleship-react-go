@@ -34,9 +34,10 @@ var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 				row, _ := p.Args["row"].(int)
 				column, _ := p.Args["column"].(int)
-				fmt.Printf("row: %d, column: %d\n", row, column)
-				storeShot(row, column)
-				return rand.Intn(2) == 0, nil
+				shot := rand.Intn(2) == 0
+				fmt.Printf("row: %d, column: %d, shot: %t\n", row, column, shot)
+				storeShot(row, column, shot)
+				return shot, nil
 			},
 		},
 	},
@@ -46,15 +47,15 @@ var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
 	Query: rootQuery,
 })
 
-func storeShot(row int, column int) {
+func storeShot(row int, column int, shot bool) {
 	// using transaction for demonstraction purposes
 	tx, err := pgConnection.Begin(context.Background())
 	if err != nil {
 		fmt.Printf("Could not create transaction: %v\n", err)
 	}
 	_, err = tx.Exec(context.Background(),
-		"insert into shots(board_row, board_column) values ($1, $2)",
-		row, column)
+		"insert into shots(result, board_row, board_column) values ($1, $2, $3)",
+		shot, row, column)
 	if err != nil {
 		tx.Rollback(context.Background())
 		fmt.Printf("Could not insert shot: %v\n", err)
