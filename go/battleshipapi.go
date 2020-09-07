@@ -21,9 +21,45 @@ var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 				return "Battleship game Go API", nil
 			},
 		},
+		"player": &graphql.Field{
+			Type: graphql.Int,
+			Args: graphql.FieldConfigArgument{
+				"name": &graphql.ArgumentConfig{
+					Type: graphql.String,
+				},
+			},
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				name, _ := p.Args["name"].(string)
+				playerId := player(name)
+				return playerId, nil
+			},
+		},
+		"createGame": &graphql.Field{
+			Type: graphql.Int,
+			Args: graphql.FieldConfigArgument{
+				"player1Id": &graphql.ArgumentConfig{
+					Type: graphql.Int,
+				},
+				"player2Id": &graphql.ArgumentConfig{
+					Type: graphql.Int,
+				},
+			},
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				player1, _ := p.Args["player1Id"].(int)
+				player2, _ := p.Args["player2Id"].(int)
+				gameId := createGame(player1, player2)
+				return gameId, nil
+			},
+		},
 		"shot": &graphql.Field{
 			Type: graphql.Boolean,
 			Args: graphql.FieldConfigArgument{
+				"gameId": &graphql.ArgumentConfig{
+					Type: graphql.Int,
+				},
+				"playerId": &graphql.ArgumentConfig{
+					Type: graphql.Int,
+				},
 				"row": &graphql.ArgumentConfig{
 					Type: graphql.Int,
 				},
@@ -32,11 +68,12 @@ var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 				},
 			},
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				gameId, _ := p.Args["gameId"].(int)
+				playerId, _ := p.Args["playerId"].(int)
 				row, _ := p.Args["row"].(int)
 				column, _ := p.Args["column"].(int)
 				shot := rand.Intn(2) == 0
-				fmt.Printf("row: %d, column: %d, shot: %t\n", row, column, shot)
-				storeShot(row, column, shot)
+				storeShot(gameId, playerId, row, column, shot)
 				return shot, nil
 			},
 		},
@@ -47,20 +84,44 @@ var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
 	Query: rootQuery,
 })
 
-func storeShot(row int, column int, shot bool) {
+func player(name string) int {
+	id := 0
+	err := pgConnection.QueryRow(context.Background(),
+		"select id from player where name=$1", name).Scan(&id)
+	if err != nil {
+		fmt.Printf("Could not query player: %v\n", err)
+	}
+	return id
+}
+
+func createGame(player1Id int, player2Id int) int {
+	id := 0
+	err := pgConnection.QueryRow(context.Background(),
+		"insert into game(player1, player2) values($1, $2) returning id",
+		player1Id, player2Id).Scan(&id)
+	if err != nil {
+		fmt.Printf("Could not insert game: %v\n", err)
+	}
+	return id
+}
+
+func storeShot(gameId int, playerId int, row int, column int, shot bool) {
+	fmt.Printf("game: %d, player: %d, row: %d, column: %d, shot: %t\n",
+		gameId, playerId, row, column, shot)
 	// using transaction for demonstraction purposes
-	tx, err := pgConnection.Begin(context.Background())
+	transaction, err := pgConnection.Begin(context.Background())
 	if err != nil {
 		fmt.Printf("Could not create transaction: %v\n", err)
 	}
-	_, err = tx.Exec(context.Background(),
-		"insert into shots(result, board_row, board_column) values ($1, $2, $3)",
-		shot, row, column)
+	_, err = transaction.Exec(context.Background(),
+		"insert into shot(game, player, result, board_row, board_column)"+
+			"values($1, $2, $3, $4, $5)",
+		gameId, playerId, shot, row, column)
 	if err != nil {
-		tx.Rollback(context.Background())
+		transaction.Rollback(context.Background())
 		fmt.Printf("Could not insert shot: %v\n", err)
 	}
-	err = tx.Commit(context.Background())
+	err = transaction.Commit(context.Background())
 	if err != nil {
 		fmt.Printf("Could not commit %v\n", err)
 	}
