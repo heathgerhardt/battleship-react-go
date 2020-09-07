@@ -78,7 +78,8 @@ class Game extends React.Component {
         player.board[row][column] = hit ? '*' : 'o';
         if (hit) player.hits++;
         this.setState({firstPlayer: !this.state.firstPlayer});
-      });
+      })
+      .catch((error) => {console.error(error)});
   }
 
   componentDidMount() {
