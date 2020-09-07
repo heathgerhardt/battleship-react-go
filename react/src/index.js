@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import battleshipApi from './battleship-service.js';
 
 function Square(props) {
   return (
@@ -32,7 +33,6 @@ class GameBoard extends React.Component {
   }
 }
 
-const ApiUrl = 'http://localhost:8080/battleship'
 const BoardDimension = 8;
 
 class Game extends React.Component {
@@ -58,14 +58,6 @@ class Game extends React.Component {
             .map(() => Array(BoardDimension).fill(null));
   }
 
-  shoot(row, column) {
-    return fetch(ApiUrl, {
-      method: 'post',
-      headers: {'Content-Type': 'application/graphql'},
-      body: `{shot(row:${row}, column:${column})}`
-    });
-  }
-
   currentPlayer() {
     return this.state.firstPlayer ? this.state.player1 : this.state.player2;
   }
@@ -79,16 +71,14 @@ class Game extends React.Component {
 
   handleClick(row, column) {
     if (this.winner()) return;
-    this.shoot(row, column)
-      .then(response => response.json())
-      .then((data) => {
+    battleshipApi.shoot(row, column)
+      .then((shotResult) => {
         const player = this.currentPlayer();
-        const hit = data.data.shot;
+        const hit = shotResult.data.shot;
         player.board[row][column] = hit ? '*' : 'o';
         if (hit) player.hits++;
         this.setState({firstPlayer: !this.state.firstPlayer});
-      },
-      (error) => {console.log(error)});
+      });
   }
 
   componentDidMount() {
