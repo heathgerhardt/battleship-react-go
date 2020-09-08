@@ -144,7 +144,7 @@ func pgConnect() *pgxpool.Pool {
 	// password would normally be set during build or access granted through
 	// some kind of access management system
 	conn, err := pgxpool.Connect(context.Background(),
-		"postgresql://localhost/battleship?user=battleship&password=bBDQX12NamCni5")
+		"postgresql://localhost/battleship?user=battleship&password=bBDQX12NamCni5&pool_max_conns=10")
 	if err != nil {
 		fmt.Printf("Unable to connect to database: %v\n", err)
 		os.Exit(1)
