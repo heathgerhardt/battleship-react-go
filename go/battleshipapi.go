@@ -9,7 +9,7 @@ import (
 
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 var rootQuery = graphql.NewObject(graphql.ObjectConfig{
@@ -21,7 +21,7 @@ var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 				return "Battleship game Go API", nil
 			},
 		},
-		"player": &graphql.Field{
+		"playerId": &graphql.Field{
 			Type: graphql.Int,
 			Args: graphql.FieldConfigArgument{
 				"name": &graphql.ArgumentConfig{
@@ -34,7 +34,7 @@ var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 				return playerId, nil
 			},
 		},
-		"createGame": &graphql.Field{
+		"gameId": &graphql.Field{
 			Type: graphql.Int,
 			Args: graphql.FieldConfigArgument{
 				"player1Id": &graphql.ArgumentConfig{
@@ -136,14 +136,14 @@ func main() {
 	})
 	http.Handle("/battleship", disableCors(server))
 	http.ListenAndServe(":8080", nil)
-	pgConnection.Close(context.Background())
+	pgConnection.Close()
 }
 
-func pgConnect() *pgx.Conn {
+func pgConnect() *pgxpool.Pool {
 	fmt.Printf("Connecting to Postgres\n")
 	// password would normally be set during build or access granted through
 	// some kind of access management system
-	conn, err := pgx.Connect(context.Background(),
+	conn, err := pgxpool.Connect(context.Background(),
 		"postgresql://localhost/battleship?user=battleship&password=bBDQX12NamCni5")
 	if err != nil {
 		fmt.Printf("Unable to connect to database: %v\n", err)

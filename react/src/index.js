@@ -39,6 +39,7 @@ class Game extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
+      gameId: null,
       player1: this.generatePlayer(1),
       player2: this.generatePlayer(2),
       firstPlayer: true
@@ -47,6 +48,7 @@ class Game extends React.Component {
 
   generatePlayer(num) {
     return {
+      id: null,
       board: this.generateBoard(),
       name: "Player " + num,
       hits: 0
@@ -71,7 +73,8 @@ class Game extends React.Component {
 
   handleClick(row, column) {
     if (this.winner()) return;
-    battleshipApi.shoot(row, column)
+    const player = this.currentPlayer();
+    battleshipApi.shoot(this.state.gameId, player.id, row, column)
       .then((shotResult) => {
         const player = this.currentPlayer();
         const hit = shotResult.data.shot;
@@ -82,8 +85,26 @@ class Game extends React.Component {
       .catch((error) => {console.error(error)});
   }
 
+  async queryPlayerId(player) {
+    const response = await battleshipApi.player(player.name)
+      .then((response) => {player.id = response.data.playerId})
+      .catch((error) => {console.error(error)});
+    return response;
+  }
+
+  queryGameId() {
+    battleshipApi.game(this.state.player1.id, this.state.player2.id)
+      .then((response) => {this.state.gameId = response.data.gameId})
+  }
+
   componentDidMount() {
-    console.log("game load");
+    // the playerId and gameId could be retrieved in one call but
+    // showing how to handle dependencies in multiple promises
+    // Mutating state directly here I do not want the UI to update
+    const player1Call = this.queryPlayerId(this.state.player1);
+    const player2Call = this.queryPlayerId(this.state.player2);
+    Promise.all([player1Call, player2Call])
+      .then(() => {this.queryGameId()});
   }
 
   render() {
