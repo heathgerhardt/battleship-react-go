@@ -95,6 +95,7 @@ class Game extends React.Component {
   queryGameId() {
     battleshipApi.game(this.state.player1.id, this.state.player2.id)
       .then((response) => {this.state.gameId = response.data.gameId})
+      .catch((error) => {console.error(error)});
   }
 
   componentDidMount() {
@@ -105,7 +106,8 @@ class Game extends React.Component {
     const player1Call = this.queryPlayerId(this.state.player1);
     const player2Call = this.queryPlayerId(this.state.player2);
     Promise.all([player1Call, player2Call])
-      .then(() => {this.queryGameId()});
+      .then(() => {this.queryGameId()})
+      .catch((error) => {console.error(error)});
   }
 
   render() {
