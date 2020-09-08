@@ -9,8 +9,6 @@ Note: Normally I would never print to stdout or the console, logging and a debug
 TODO:
 * place ships in React
 * endpoint for ship placement
-* implement shot logic on server
 * game win logic on server
-* create game session
 * react tests
 * go tests
