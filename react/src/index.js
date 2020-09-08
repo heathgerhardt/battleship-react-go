@@ -98,9 +98,10 @@ class Game extends React.Component {
   }
 
   componentDidMount() {
-    // the playerId and gameId could be retrieved in one call but
-    // showing how to handle dependencies in multiple promises
-    // Mutating state directly here I do not want the UI to update
+    // 1) Creating game session
+    // 2) The playerId and gameId could be retrieved in one call but
+    //    showing how to handle dependencies with multiple promises
+    // 3) Mutating state directly here I do not want the UI to update
     const player1Call = this.queryPlayerId(this.state.player1);
     const player2Call = this.queryPlayerId(this.state.player2);
     Promise.all([player1Call, player2Call])
