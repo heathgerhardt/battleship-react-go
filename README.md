@@ -7,6 +7,7 @@ Only one ship per player to keep it simple.
 Note: Normally I would never print to stdout or the console, logging and a debugger would be used instead, but this project is for demonstration purposes and as such I am limiting the complexity and dependencies.
 
 Features:
+* Two players take turns shooting at squares
 * Game board in React
 * Golang server
 * GraphQL API
